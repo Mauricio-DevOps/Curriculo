@@ -1,0 +1,64 @@
+@{
+    ViewData["Title"] = "Projetos";
+}
+
+<section class="projects-hero">
+    <div>
+        <p class="intro-label">Projetos</p>
+        <h1>Galeria de solucoes em destaque</h1>
+        <p>
+            Uma selecao de plataformas que estao no ar e demonstram minha abordagem tecnica
+            e foco em resultado. Cada card leva diretamente para o projeto publicado.
+        </p>
+    </div>
+</section>
+
+<section class="projects-gallery">
+    @{
+        var projetos = new[]
+        {
+            new
+            {
+                Title = "GameBock",
+                Description = "Um projeto para criar e ler livros interativos.",
+                Image = Url.Content("~/images/Gameboock.png"),
+                Link = "https://gameboock-mauricio-dev-hedrbshjfmgnendp.brazilsouth-01.azurewebsites.net"
+            },
+            new
+            {
+                Title = "Curriculo",
+                Description = "Um projeto para me apresentar de forma profissional e dar visibilidade aos meus projetos.",
+                Image = Url.Content("~/images/Curriculo.png"),
+                Link = "https://curriculo-mauricio-dev-hcajgtgafjhmfegk.brazilsouth-01.azurewebsites.net"
+            },
+            new
+            {
+                Title = "Curso de Ingles",
+                Description = "Um sistema para cadastro de alunos e de material para curso de ingles.",
+                Image = Url.Content("~/images/AulaIngles.png"),
+                Link = "https://auladeingles-mauricio-dev-f7f3cea2f3bxcxgf.brazilsouth-01.azurewebsites.net"
+            },
+            new
+            {
+                Title = "API IA Integrada",
+                Description = "API que expõe agentes OpenAI prontos para integrar outros sistemas e fluxos corporativos.",
+                Image = Url.Content("~/images/API.png"),
+                Link = ""
+            }
+        };
+    }
+    <div class="projects-grid">
+        @foreach (var projeto in projetos)
+        {
+            <a class="project-tile" href="@projeto.Link" target="_blank" rel="noopener noreferrer">
+                <div class="project-image">
+                    <img src="@projeto.Image" alt="@projeto.Title" />
+                </div>
+                <div class="project-info">
+                    <h3>@projeto.Title</h3>
+                    <p>@projeto.Description</p>
+                </div>
+            </a>
+        }
+    </div>
+</section>

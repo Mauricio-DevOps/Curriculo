@@ -1,0 +1,457 @@
+@{
+    ViewData["Title"] = "Mauricio Naves Marques";
+}
+
+<section class="hero-section">
+    <div class="hero-text">
+        <p class="intro-label">Olá, eu sou</p>
+        <h1>Mauricio Naves Marques</h1>
+        <p class="hero-role">Analista de Desenvolvimento <span>Sênior</span></p>
+        <p class="hero-description">
+            Bem-vindo ao meu portfólio! Atuo no desenvolvimento de soluções com foco em Inteligência Artificial, ajudando empresas que têm tecnologia e inovação em seu DNA a transformarem ideias em produtos digitais com eficiência, qualidade e impacto. Quer saber um pouco mais sobre mim? Converse com meu agente de IA no menu
+            <a class="hero-chatbot-link" asp-controller="Home" asp-action="ChatBot">ChatBot</a>.
+        </p>
+        <div class="hero-actions">
+            <a class="btn primary" asp-controller="Home" asp-action="Sobre">Sobre Mim</a>
+            <a class="btn secondary" asp-controller="Home" asp-action="Contato">Entre em Contato</a>
+            <a class="btn secondary download" href="~/docs/CV_MaurícioNavesMarques.pdf" download>Baixar Currículo</a>
+        </div>
+    </div>
+    <div class="hero-visual">
+        <div class="profile-wrap">
+            <div class="glow"></div>
+
+            <div class="profile-card">
+                <div class="profile-accent"></div>
+
+                <div class="profile-media">
+                    <img src="~/images/Foto.jpeg" alt="Retrato de Mauricio Naves Marques" />
+                    <span>BELO HORIZONTE, MINAS GERAIS</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</section>
+
+<section class="featured-section" id="projetos">
+    <div class="section-header">
+        <p>Projetos em Destaque</p>
+        <h2>Algumas das minhas soluções em produção</h2>
+    </div>
+    @{
+        var featuredProjects = new[]
+        {
+            new
+            {
+                Title = "GameBock",
+                Description = "Um projeto para criar e ler livros interativos.",
+                Image = Url.Content("~/images/Gameboock.png"),
+                Link = "https://gameboock-mauricio-dev-hedrbshjfmgnendp.brazilsouth-01.azurewebsites.net"
+            },
+            new
+            {
+                Title = "Currículo",
+                Description = "Um projeto para me apresentar de forma profissional e dar visibilidade aos meus projetos.",
+                Image = Url.Content("~/images/Curriculo.png"),
+                Link = "https://curriculo-mauricio-dev-hcajgtgafjhmfegk.brazilsouth-01.azurewebsites.net"
+            },
+            new
+            {
+                Title = "Curso de Inglês",
+                Description = "Um sistema para cadastro de alunos e de material para curso de inglês.",
+                Image = Url.Content("~/images/AulaIngles.png"),
+                Link = "https://auladeingles-mauricio-dev-f7f3cea2f3bxcxgf.brazilsouth-01.azurewebsites.net"
+            }
+        };
+    }
+    <div class="project-grid">
+        @foreach (var project in featuredProjects)
+        {
+            <a class="project-card" href="@project.Link" target="_blank" rel="noopener noreferrer">
+                <div class="project-icon">
+                    <span></span>
+                </div>
+                <h3>@project.Title</h3>
+                <p>@project.Description</p>
+                <span class="link">Ver Projeto →</span>
+            </a>
+        }
+    </div>
+</section>
+
+@* <div class="chat-widget" data-chatkit-launcher>
+    <button class="chat-toggle" type="button" aria-label="Abrir chat" aria-expanded="false">
+        <span>🤖</span>
+    </button>
+    <div class="chat-panel" aria-live="polite">
+        <header>
+            <div>
+                <strong>Agende de Currículo</strong>
+                <p>Workflow conectado ao ChatKit</p>
+            </div>
+            <button class="chat-close" type="button" aria-label="Fechar chat" data-chatkit-close>×</button>
+        </header>
+        <div class="chatkit-body">
+            <openai-chatkit class="chatkit-frame" data-chatkit-element aria-live="polite"></openai-chatkit>
+        </div>
+        <div class="chatkit-controls">
+            <button type="button" class="btn secondary" data-chatkit-refresh>Gerar nova sessão</button>
+            <span class="chatkit-status" data-chatkit-status aria-live="polite">
+                Clique no robô para abrir o chat.
+            </span>
+        </div>
+    </div>
+<div class="chatkit-backdrop" data-chatkit-backdrop></div>
+</div> *@
+
+@* <div class="assistant-chat" data-assistant-chat>
+    <button class="assistant-toggle" type="button" aria-label="Abrir assistente" aria-expanded="false" data-assistant-toggle>
+        <span aria-hidden="true">&#128172;</span>
+        <span>Assistente IA</span>
+    </button>
+    <div class="assistant-panel" role="dialog" aria-label="Assistente IA" aria-hidden="true" data-assistant-panel>
+        <header>
+            <div>
+                <strong>Assistente IA</strong>
+                <p>Converse comigo sobre o currículo</p>
+            </div>
+            <button type="button" class="assistant-close" aria-label="Fechar assistente" data-assistant-close>&times;</button>
+        </header>
+        <div class="assistant-messages" data-assistant-messages role="log" aria-live="polite">
+            <p class="assistant-placeholder" data-assistant-placeholder>Envie uma mensagem para iniciar a conversa.</p>
+        </div>
+        <form class="assistant-form" data-assistant-form>
+            <textarea data-assistant-input placeholder="Digite sua mensagem..." aria-label="Mensagem para o assistente" rows="2" required></textarea>
+            <div class="assistant-form-actions">
+                <button type="submit" class="btn primary" data-assistant-submit>Enviar</button>
+            </div>
+        </form>
+        <div class="assistant-status" data-assistant-status aria-live="polite"></div>
+    </div>
+</div> *@
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const wrapper = document.querySelector('[data-chatkit-launcher]');
+            if (wrapper) {
+                const toggle = wrapper.querySelector('.chat-toggle');
+                const panel = wrapper.querySelector('.chat-panel');
+                const closeBtn = wrapper.querySelector('[data-chatkit-close]');
+                const backdrop = wrapper.querySelector('[data-chatkit-backdrop]');
+                const element = wrapper.querySelector('[data-chatkit-element]');
+                const refreshButton = wrapper.querySelector('[data-chatkit-refresh]');
+                const statusElement = wrapper.querySelector('[data-chatkit-status]');
+
+                if (element && window.customElements) {
+                    const storageKey = 'chatkit-device-id';
+                    let isMounting = false;
+                    let listenersAttached = false;
+
+                    const setStatus = (message, isError) => {
+                        if (!statusElement) return;
+                        statusElement.textContent = message || '';
+                        statusElement.classList.toggle('error', Boolean(isError));
+                    };
+
+                    const getDeviceId = () => {
+                        try {
+                            const storage = window.localStorage;
+                            if (!storage) throw new Error('No storage available');
+                            let value = storage.getItem(storageKey);
+                            if (!value) {
+                                value = window.crypto?.randomUUID ? window.crypto.randomUUID() : `device-${Date.now()}`;
+                                storage.setItem(storageKey, value);
+                            }
+                            return value;
+                        } catch {
+                            return window.crypto?.randomUUID ? window.crypto.randomUUID() : `device-${Date.now()}`;
+                        }
+                    };
+
+                    const requestClientSecret = async () => {
+                        const response = await fetch('/api/chatkit/session', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                deviceId: getDeviceId()
+                            })
+                        });
+
+                        const raw = await response.text();
+                        const payload = raw ? (() => {
+                            try {
+                                return JSON.parse(raw);
+                            } catch {
+                                return null;
+                            }
+                        })() : null;
+
+                        if (!response.ok) {
+                            const detail = payload?.detail || payload?.message || raw || 'Erro ao criar sessão do ChatKit.';
+                            throw new Error(detail);
+                        }
+
+                        const secret = payload?.client_secret;
+                        if (!secret) {
+                            throw new Error('A resposta do ChatKit não trouxe o client_secret.');
+                        }
+
+                        return secret;
+                    };
+
+                    const buildChatKitOptions = () => ({
+                        api: {
+                            async getClientSecret(existing) {
+                                if (existing) {
+                                    setStatus('Atualizando sessão do ChatKit...');
+                                } else {
+                                    setStatus('Criando sessão do ChatKit...');
+                                }
+
+                                try {
+                                    const secret = await requestClientSecret();
+                                    setStatus('Sessão ativa.');
+                                    return secret;
+                                } catch (error) {
+                                    setStatus(error?.message || 'Erro ao obter client secret.', true);
+                                    throw error;
+                                }
+                            }
+                        },
+                        theme: {
+                            colorScheme: 'dark',
+                            radius: 'pill',
+                            density: 'normal',
+                            color: {
+                                accent: {
+                                    primary: '#a52727',
+                                    level: 1
+                                }
+                            },
+                            typography: {
+                                baseSize: 16,
+                                fontFamily: '"OpenAI Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif',
+                                fontFamilyMono: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace',
+                                fontSources: [
+                                    {
+                                        family: 'OpenAI Sans',
+                                        src: 'https://cdn.openai.com/common/fonts/openai-sans/v2/OpenAISans-Regular.woff2',
+                                        weight: 400,
+                                        style: 'normal',
+                                        display: 'swap'
+                                    }
+                                ]
+                            }
+                        },
+                        composer: {
+                            attachments: {
+                                enabled: true,
+                                maxCount: 5,
+                                maxSize: 10485760
+                            },
+                            tools: [
+                                {
+                                    id: 'search_docs',
+                                    label: 'Buscar documentos',
+                                    shortLabel: 'Docs',
+                                    placeholderOverride: 'Pesquisar documentação',
+                                    icon: 'book-open',
+                                    pinned: false
+                                }
+                            ]
+                        },
+                        startScreen: {
+                            greeting: '',
+                            prompts: [
+                                {
+                                    icon: 'circle-question',
+                                    label: 'O que é o ChatKit?',
+                                    prompt: 'O que é o ChatKit?'
+                                },
+                                {
+                                    icon: 'circle-question',
+                                    label: 'Resumo profissional',
+                                    prompt: 'Faça um resumo profissional do Mauricio.'
+                                },
+                                {
+                                    icon: 'circle-question',
+                                    label: 'Destaques',
+                                    prompt: 'Quais os principais destaques da carreira?'
+                                }
+                            ]
+                        },
+                        frameTitle: 'ChatKit - Fluxo do currículo'
+                    });
+
+                    const attachEventListeners = () => {
+                        if (listenersAttached) return;
+
+                        element.addEventListener('chatkit.ready', () => {
+                            setStatus('ChatKit pronto para uso.');
+                        });
+
+                        element.addEventListener('chatkit.error', (event) => {
+                            const detail = event?.detail?.error;
+                            const message = typeof detail === 'string'
+                                ? detail
+                                : detail?.message || 'Erro inesperado no ChatKit.';
+                            console.error('ChatKit error:', detail);
+                            setStatus(message, true);
+                        });
+
+                        listenersAttached = true;
+                    };
+
+                    const mountChatKit = async () => {
+                        if (isMounting) return;
+                        isMounting = true;
+                        attachEventListeners();
+                        setStatus('Preparando ChatKit...');
+                        try {
+                            await window.customElements.whenDefined('openai-chatkit');
+                            element.setOptions(buildChatKitOptions());
+                        } catch (error) {
+                            console.error('Erro ao inicializar o ChatKit:', error);
+                            setStatus(error?.message || 'Erro ao iniciar o ChatKit.', true);
+                        } finally {
+                            isMounting = false;
+                        }
+                    };
+
+                    const togglePanel = (state) => {
+                        const nextState = state ?? !panel.classList.contains('open');
+                        panel.classList.toggle('open', nextState);
+                        backdrop?.classList.toggle('visible', nextState);
+                        toggle?.setAttribute('aria-expanded', String(nextState));
+                        if (nextState) {
+                            mountChatKit();
+                        }
+                    };
+
+                    toggle?.addEventListener('click', () => togglePanel());
+                    closeBtn?.addEventListener('click', () => togglePanel(false));
+                    backdrop?.addEventListener('click', () => togglePanel(false));
+
+                    refreshButton?.addEventListener('click', () => {
+                        mountChatKit();
+                    });
+                }
+            }
+
+            const assistantWrapper = document.querySelector('[data-assistant-chat]');
+            if (assistantWrapper) {
+                const assistantToggle = assistantWrapper.querySelector('[data-assistant-toggle]');
+                const assistantPanel = assistantWrapper.querySelector('[data-assistant-panel]');
+                const assistantClose = assistantWrapper.querySelector('[data-assistant-close]');
+                const assistantMessages = assistantWrapper.querySelector('[data-assistant-messages]');
+                const assistantPlaceholder = assistantWrapper.querySelector('[data-assistant-placeholder]');
+                const assistantForm = assistantWrapper.querySelector('[data-assistant-form]');
+                const assistantInput = assistantWrapper.querySelector('[data-assistant-input]');
+                const assistantSubmit = assistantWrapper.querySelector('[data-assistant-submit]');
+                const assistantStatus = assistantWrapper.querySelector('[data-assistant-status]');
+
+                let isAssistantSending = false;
+                let previousResponseId = null;
+
+                const toggleAssistantPanel = (state) => {
+                    const next = typeof state === 'boolean'
+                        ? state
+                        : !assistantWrapper.classList.contains('open');
+                    assistantWrapper.classList.toggle('open', next);
+                    assistantPanel?.setAttribute('aria-hidden', String(!next));
+                    assistantToggle?.setAttribute('aria-expanded', String(next));
+                    if (next) {
+                        assistantInput?.focus();
+                    }
+                };
+
+                const setAssistantStatus = (message, isError = false) => {
+                    if (!assistantStatus) return;
+                    assistantStatus.textContent = message || '';
+                    assistantStatus.classList.toggle('error', Boolean(isError));
+                };
+
+                const appendAssistantMessage = (role, text) => {
+                    if (!assistantMessages || !text) return;
+                    assistantPlaceholder?.classList.add('hidden');
+                    const bubble = document.createElement('div');
+                    bubble.className = `assistant-bubble ${role}`;
+                    bubble.textContent = text;
+                    assistantMessages.appendChild(bubble);
+                    assistantMessages.scrollTop = assistantMessages.scrollHeight;
+                };
+
+                const setAssistantLoading = (state) => {
+                    isAssistantSending = state;
+                    if (assistantInput) {
+                        assistantInput.disabled = state;
+                    }
+                    if (assistantSubmit) {
+                        assistantSubmit.disabled = state;
+                    }
+                    if (!state && assistantInput) {
+                        assistantInput.focus();
+                    }
+                };
+
+                assistantToggle?.addEventListener('click', () => toggleAssistantPanel());
+                assistantClose?.addEventListener('click', () => toggleAssistantPanel(false));
+
+                assistantForm?.addEventListener('submit', async (event) => {
+                    event.preventDefault();
+                    if (isAssistantSending) return;
+                    const prompt = assistantInput?.value?.trim();
+                    if (!prompt) return;
+
+                    appendAssistantMessage('user', prompt);
+                    assistantInput.value = '';
+                    setAssistantLoading(true);
+                    setAssistantStatus('Enviando mensagem...');
+
+                    try {
+                        const response = await fetch('/api/assistant-chat/message', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                prompt,
+                                previousResponseId,
+                                useFileSearch: true
+                            })
+                        });
+
+                        const raw = await response.text();
+                        let payload = null;
+                        if (raw) {
+                            try {
+                                payload = JSON.parse(raw);
+                            } catch {
+                                payload = null;
+                            }
+                        }
+
+                        if (!response.ok) {
+                            throw new Error(payload?.message || raw || 'Erro ao enviar a mensagem.');
+                        }
+
+                        previousResponseId = payload?.responseId || null;
+                        appendAssistantMessage('assistant', payload?.outputText || 'Sem resposta.');
+                        setAssistantStatus('Resposta recebida.');
+                    } catch (error) {
+                        const fallback = error?.message || 'Erro inesperado.';
+                        appendAssistantMessage('assistant', fallback);
+                        setAssistantStatus(fallback, true);
+                    } finally {
+                        setAssistantLoading(false);
+                    }
+                });
+            }
+        });
+    </script>
+}

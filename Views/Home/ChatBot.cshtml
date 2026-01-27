@@ -1,0 +1,368 @@
+@inject Microsoft.Extensions.Options.IOptions<ChatKitSettings> ChatKitOptions
+
+@{
+    ViewData["Title"] = "ChatBot";
+    var chatKitDomainKey = ChatKitOptions?.Value?.DomainKey;
+}
+
+<section class="chatbots-hero">
+    <p>Experiencias interativas</p>
+    <h1>Central de ChatBots</h1>
+    @* <p>Acesse os dois assistentes disponiveis: o fluxo oficial com o ChatKit e o assistente personalizado que consome a API externa.</p> *@
+</section>
+
+<section class="chatbots-grid">
+    @* <div class="chatbots-card" data-page-chatkit data-chatkit-domain-key="@chatKitDomainKey">
+        <header>
+            <div>
+                <p>Workflow conectado ao ChatKit</p>
+                <h2>Chat profissional</h2>
+            </div>
+            <button type="button" class="btn secondary" data-chatkit-inline-refresh>Atualizar sessao</button>
+        </header>
+        <p class="chatbots-description">
+            Este chatbot usa o ChatKit da OpenAI configurado no Agents Builder. Enquanto o site estiver em um dominio gratuito do Azure, a verificacao falha e o widget nao carrega em producao; executando localmente ou em um dominio proprio ele funciona normalmente.
+        </p>
+
+        <div class="chatbots-card-body chatkit-card">
+            <openai-chatkit class="chatkit-frame" data-chatkit-inline-element aria-live="polite"></openai-chatkit>
+        </div>
+        <p class="chatkit-status" data-chatkit-inline-status>Preparando ChatKit...</p>
+    </div> *@
+
+    <div class="chatbots-card" data-page-assistant>
+        <header>
+            <div>
+                <p>Assistente conectado a API personalizada</p>
+                <h2>Assistente IA</h2>
+            </div>
+        </header>
+        <p class="chatbots-description">
+            Este assistente foi desenvolvido do zero integrando diretamente a API da OpenAI com o site e continua contando com a base de conhecimento configurada para responder as perguntas.
+        </p>
+
+        <div class="assistant-inline" role="log" aria-live="polite" data-assistant-inline-messages>
+            <p class="assistant-placeholder" data-assistant-inline-placeholder>Envie uma mensagem para iniciar a conversa.</p>
+        </div>
+        <form class="assistant-inline-form" data-assistant-inline-form>
+            <label class="sr-only" for="assistantMessage">Mensagem</label>
+            <textarea id="assistantMessage" rows="3" placeholder="Digite sua mensagem..." data-assistant-inline-input required></textarea>
+            <div class="assistant-inline-actions">
+                <button type="submit" class="btn primary" data-assistant-inline-submit>Enviar</button>
+            </div>
+        </form>
+        <div class="assistant-status" data-assistant-inline-status aria-live="polite"></div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const initChatKitCard = () => {
+                const card = document.querySelector('[data-page-chatkit]');
+                if (!card) return;
+                const element = card.querySelector('[data-chatkit-inline-element]');
+                const statusElement = card.querySelector('[data-chatkit-inline-status]');
+                const refreshButton = card.querySelector('[data-chatkit-inline-refresh]');
+                if (!element || !window.customElements) return;
+                const domainKey = card?.dataset.chatkitDomainKey?.trim();
+
+                const storageKey = 'chatkit-device-id';
+                let listenersAttached = false;
+                let isMounting = false;
+
+                const setStatus = (message, isError) => {
+                    if (!statusElement) return;
+                    statusElement.textContent = message || '';
+                    statusElement.classList.toggle('error', Boolean(isError));
+                };
+
+                const getDeviceId = () => {
+                    try {
+                        const storage = window.localStorage;
+                        if (!storage) throw new Error('No storage');
+                        let value = storage.getItem(storageKey);
+                        if (!value) {
+                            value = window.crypto?.randomUUID ? window.crypto.randomUUID() : 'device-' + Date.now();
+                            storage.setItem(storageKey, value);
+                        }
+                        return value;
+                    } catch {
+                        return window.crypto?.randomUUID ? window.crypto.randomUUID() : 'device-' + Date.now();
+                    }
+                };
+
+                const requestClientSecret = async () => {
+                    const response = await fetch('/api/chatkit/session', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ deviceId: getDeviceId() })
+                    });
+
+                    const raw = await response.text();
+                    let payload = null;
+                    if (raw) {
+                        try {
+                            payload = JSON.parse(raw);
+                        } catch {
+                            payload = null;
+                        }
+                    }
+
+                    if (!response.ok) {
+                        const detail = payload?.detail || payload?.message || raw || 'Erro ao criar sessao do ChatKit.';
+                        throw new Error(detail);
+                    }
+
+                    const secret = payload?.client_secret;
+                    if (!secret) {
+                        throw new Error('A resposta do ChatKit nao trouxe o client_secret.');
+                    }
+
+                    return secret;
+                };
+
+                const buildChatKitOptions = () => {
+                    const apiConfig = {
+                        async getClientSecret(existing) {
+                            if (existing) {
+                                setStatus('Atualizando sessao do ChatKit...');
+                            } else {
+                                setStatus('Criando sessao do ChatKit...');
+                            }
+
+                            try {
+                                const secret = await requestClientSecret();
+                                setStatus('Sessao ativa.');
+                                return secret;
+                            } catch (error) {
+                                setStatus(error?.message || 'Erro ao obter client secret.', true);
+                                throw error;
+                            }
+                        }
+                    };
+
+                    if (domainKey) {
+                        apiConfig.domainKey = domainKey;
+                    }
+
+                    return {
+                        api: apiConfig,
+                        theme: {
+                            colorScheme: 'dark',
+                            radius: 'pill',
+                            density: 'normal',
+                            color: {
+                                accent: {
+                                    primary: '#a52727',
+                                    level: 1
+                                }
+                            },
+                            typography: {
+                                baseSize: 16,
+                                fontFamily: '"OpenAI Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif',
+                                fontFamilyMono: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace',
+                                fontSources: [
+                                    {
+                                        family: 'OpenAI Sans',
+                                        src: 'https://cdn.openai.com/common/fonts/openai-sans/v2/OpenAISans-Regular.woff2',
+                                        weight: 400,
+                                        style: 'normal',
+                                        display: 'swap'
+                                    }
+                                ]
+                            }
+                        },
+                        composer: {
+                            attachments: {
+                                enabled: true,
+                                maxCount: 5,
+                                maxSize: 10485760
+                            }
+                        },
+                        frameTitle: 'ChatKit - Fluxo do curriculo'
+                    };
+                };
+
+                const logChatKitError = (detail) => {
+                    const detailMessage = typeof detail === 'string'
+                        ? detail
+                        : detail?.message || detail?.statusText || 'Erro inesperado no ChatKit.';
+                    const debugInfo = {
+                        host: window.location.host,
+                        domainKey: domainKey || '(none)',
+                        domainKeyLength: domainKey?.length || 0,
+                        hasDomainKey: Boolean(domainKey),
+                        timestamp: new Date().toISOString()
+                    };
+                    if (detail?.status) {
+                        debugInfo.status = detail.status;
+                    }
+                    if (detail?.code) {
+                        debugInfo.code = detail.code;
+                    }
+                    console.groupCollapsed?.('ChatKit error');
+                    console.error('ChatKit error detail:', detail);
+                    console.info('ChatKit debug info:', debugInfo);
+                    console.groupEnd?.();
+                    let statusMessage = detailMessage;
+                    if (detailMessage.toLowerCase().includes('domain verification')) {
+                        statusMessage += ' (verifique se o host e o Domain Key correspondem ao allowlist).';
+                    }
+                    setStatus(statusMessage, true);
+                };
+
+                const attachEventListeners = () => {
+                    if (listenersAttached) return;
+                    element.addEventListener('chatkit.ready', () => {
+                        setStatus('ChatKit pronto para uso.');
+                    });
+                    element.addEventListener('chatkit.error', (event) => {
+                        const detail = event?.detail?.error;
+                        if (detail) {
+                            logChatKitError(detail);
+                        } else {
+                            logChatKitError('Erro desconhecido reportado pelo ChatKit.');
+                        }
+                    });
+                    listenersAttached = true;
+                };
+
+                const mountChatKit = async () => {
+                    if (isMounting) return;
+                    isMounting = true;
+                    attachEventListeners();
+                    setStatus('Preparando ChatKit...');
+                    try {
+                        await window.customElements.whenDefined('openai-chatkit');
+                        element.setOptions(buildChatKitOptions());
+                    } catch (error) {
+                        console.error('Erro ao inicializar o ChatKit:', error);
+                        setStatus(error?.message || 'Erro ao iniciar o ChatKit.', true);
+                    } finally {
+                        isMounting = false;
+                    }
+                };
+
+                refreshButton?.addEventListener('click', () => {
+                    mountChatKit();
+                });
+
+                mountChatKit();
+            };
+
+            const initAssistantCard = () => {
+                const card = document.querySelector('[data-page-assistant]');
+                if (!card) return;
+                const messages = card.querySelector('[data-assistant-inline-messages]');
+                const placeholder = card.querySelector('[data-assistant-inline-placeholder]');
+                const form = card.querySelector('[data-assistant-inline-form]');
+                const input = card.querySelector('[data-assistant-inline-input]');
+                const submit = card.querySelector('[data-assistant-inline-submit]');
+                const statusElement = card.querySelector('[data-assistant-inline-status]');
+
+                let isSending = false;
+                let previousResponseId = null;
+
+                const setStatus = (message, isError) => {
+                    if (!statusElement) return;
+                    statusElement.textContent = message || '';
+                    statusElement.classList.toggle('error', Boolean(isError));
+                };
+
+                const appendMessage = (role, text) => {
+                    if (!messages || !text) return;
+                    placeholder?.classList.add('hidden');
+                    const bubble = document.createElement('div');
+                    bubble.className = 'assistant-bubble ' + role;
+                    bubble.textContent = text;
+                    messages.appendChild(bubble);
+                    messages.scrollTop = messages.scrollHeight;
+                };
+
+                const setLoading = (state) => {
+                    isSending = state;
+                    if (input) input.disabled = state;
+                    if (submit) submit.disabled = state;
+                    if (statusElement) {
+                        statusElement.classList.toggle('loading', state);
+                        if (state) {
+                            statusElement.setAttribute('aria-busy', 'true');
+                            statusElement.textContent = 'Processando mensagem...';
+                        } else {
+                            statusElement.removeAttribute('aria-busy');
+                        }
+                    }
+                    if (!state && input) input.focus();
+                };
+
+                const triggerSubmit = () => {
+                    if (!form || isSending) return;
+                    if (typeof form.requestSubmit === 'function') {
+                        form.requestSubmit(submit || undefined);
+                    } else if (submit) {
+                        submit.click();
+                    } else {
+                        form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+                    }
+                };
+
+                input?.addEventListener('keydown', (event) => {
+                    if (event.key !== 'Enter' || event.shiftKey || event.isComposing) return;
+                    event.preventDefault();
+                    triggerSubmit();
+                });
+
+                form?.addEventListener('submit', async (event) => {
+                    event.preventDefault();
+                    if (isSending) return;
+                    const prompt = input?.value?.trim();
+                    if (!prompt) return;
+
+                    appendMessage('user', prompt);
+                    input.value = '';
+                    setLoading(true);
+
+                    try {
+                        const response = await fetch('/api/assistant-chat/message', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                prompt,
+                                previousResponseId,
+                                useFileSearch: true
+                            })
+                        });
+
+                        const raw = await response.text();
+                        let payload = null;
+                        if (raw) {
+                            try {
+                                payload = JSON.parse(raw);
+                            } catch {
+                                payload = null;
+                            }
+                        }
+
+                        if (!response.ok) {
+                            throw new Error(payload?.message || raw || 'Erro ao enviar a mensagem.');
+                        }
+
+                        previousResponseId = payload?.responseId || null;
+                        appendMessage('assistant', payload?.outputText || 'Sem resposta.');
+                        setStatus('Resposta recebida.');
+                    } catch (error) {
+                        const fallback = error?.message || 'Erro inesperado.';
+                        appendMessage('assistant', fallback);
+                        setStatus(fallback, true);
+                    } finally {
+                        setLoading(false);
+                    }
+                });
+            };
+
+            initChatKitCard();
+            initAssistantCard();
+        });
+    </script>
+}

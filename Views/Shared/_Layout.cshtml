@@ -1,0 +1,43 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Curriculo</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Curriculo.styles.css" asp-append-version="true" />
+    <script src="https://cdn.platform.openai.com/deployments/chatkit/chatkit.js" async></script>
+</head>
+<body class="dark-theme">
+    <header class="site-header">
+        <div class="nav-container">
+            <a class="brand" asp-area="" asp-controller="Home" asp-action="Index">Mauricio Naves</a>
+            <nav class="nav-links">
+                <a asp-controller="Home" asp-action="Index" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : null)">Home</a>
+                <a asp-controller="Home" asp-action="Sobre" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Sobre" ? "active" : null)">Sobre Mim</a>
+                <a asp-controller="Home" asp-action="Habilidades" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Habilidades" ? "active" : null)">Habilidades</a>
+                <a asp-controller="Home" asp-action="Projetos" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Projetos" ? "active" : null)">Projetos</a>
+                <a asp-controller="Home" asp-action="ChatBot" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "ChatBot" ? "active" : null)">ChatBot</a>
+                <a asp-controller="Home" asp-action="Contato" class="@(ViewContext.RouteData.Values["action"]?.ToString() == "Contato" ? "active" : null)">Contato</a>
+            </nav>
+        </div>
+    </header>
+    <div class="content-wrapper">
+        <main role="main" class="main-content" id="home">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="site-footer">
+        <div class="footer-content">
+            <span>&copy; 2026 - Mauricio Naves</span>
+            <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
